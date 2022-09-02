@@ -2,61 +2,78 @@
 
 namespace App\Http\Controllers\Admin;
 
-use Carbon\Carbon;
-use App\Models\User;
-use Illuminate\Support\Str;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Mail\ResetPasswordMail;
+use App\Models\User;
+use Carbon\Carbon;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 
 class PasswordController extends Controller
 {
-    public function forgetPassword()
+    public function create()
     {
         return view('admin.pages.password.forget_password');
     }
-    public function forgetPasswordEmailPost(Request $request)
+
+    public function store(Request $request)
     {
-        $request->validate([
-            'email'=>'required|exists:users'
+        $validator = $request->validate([
+            'email' => 'required|exists:users'
         ]);
-        $token=Str::random(50);
-        $user=User::where('email', $request->email)->first();
-        $user->update([
-            'reset_token'=>$token,
-            'reset_token_expire_at'=>Carbon::now()->addMinute(2),
-        ]);
-        $link=route('reset.password', $token);
-        Mail::to($request->email)->send(new ResetPasswordMail($link));
+
+        if ($validator->fails()) {
+            return redirect()
+                ->back()
+                ->withErrors($validator)
+                ->withInput();
+        }
+
+        User::where('email', $request->email)
+            ->firstOrFail()
+            ->update([
+                'reset_token' => $token = Str::random(50),
+                'reset_token_expire_at' => Carbon::now()->addDay(),
+            ]);
+
+        // I will suggest to trigger an event from here.
+        Mail::to($request->email)->send(new ResetPasswordMail(route('reset.password', $token)));
+
         return redirect()->route('master.login');
     }
-    public function resetPassword($token)
+
+    public function update(Request $request)
     {
-        return view('admin.pages.password.reset_password', compact('token'));
-    }
-    public function resetPasswordPost(Request $request)
-    {
-        $request->validate([
-            'reset_token'=>'required',
-            'password'=>'required|confirmed',
+        $validator = $request->validate([
+            'reset_token' => 'required',
+            'password' => 'required|confirmed',
         ]);
-        //check token exist or not
-        $userHasToken=User::where('reset_token',$request->reset_token)->first();
-        if($userHasToken){
-            //check token expired or not
-            if($userHasToken->reset_token_expire_at>=Carbon::now()){
-               $userHasToken->update([
-                  'password'=> bcrypt($request->password),
-                   'reset_token'=>null
-               ]);
-               return redirect()->back();
-            }else{
-                return redirect()->back();
-            }
-        }else
-        {
-            return redirect()->back();
+
+        if ($validator->fails()) {
+            return redirect()
+                ->back()
+                ->withErrors($validator)
+                ->withInput();
         }
+
+        $user = User::query()
+            ->where("reset_token", $request->reset_token)
+            ->isTokenAlived()
+            ->firstOrFail();
+
+        $user->update([
+            'password' => bcrypt($request->password),
+            'reset_token' => null
+        ]);
+    }
+
+    public function show(string $token)
+    {
+        if (!$token) {
+            abort(404);
+        }
+
+        return view('admin.pages.password.reset_password', compact('token'));
     }
 }

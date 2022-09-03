@@ -8,14 +8,12 @@ use Illuminate\Support\Facades\App;
 
 class LanguageController extends Controller
 {
-    public function changeLanguage($local){
+    public function changeLanguage($local)
+    {
+        App::setLocale($local);
 
- App::setLocale($local);
- Session()->put('applocale', $local);
+        Session()->put('applocale', $local);
 
- return redirect()->back();
-
-
-
+        return redirect()->back();
     }
 }

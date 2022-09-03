@@ -6,9 +6,9 @@ use App\Http\Controllers\Admin\Activities\InvestigationController;
 use App\Http\Controllers\Admin\Activities\MedicinecategoryController;
 use App\Http\Controllers\Admin\Activities\MedicineController;
 use App\Http\Controllers\Admin\Activities\OperationalReportController;
-use App\Http\Controllers\Admin\AdmissionController;
 use App\Http\Controllers\Admin\AdvancePaymentController;
-use App\Http\Controllers\Admin\AppointmentController;
+use App\Http\Controllers\Admin\AppointmentsController;
+use App\Http\Controllers\Admin\AssignTestController;
 use App\Http\Controllers\Admin\BedController;
 use App\Http\Controllers\Admin\Bill\BillController;
 use App\Http\Controllers\Admin\CabinController;
@@ -16,7 +16,7 @@ use App\Http\Controllers\Admin\ClinicController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\DepartmentController;
 use App\Http\Controllers\Admin\DesignationController;
-use App\Http\Controllers\Admin\DoctorController;
+use App\Http\Controllers\Admin\DoctorsController;
 use App\Http\Controllers\Admin\Export\DoctorDeptExportController;
 use App\Http\Controllers\Admin\Export\DoctorExportController;
 use App\Http\Controllers\Admin\Export\HospitalActivitiesExportController;
@@ -31,9 +31,10 @@ use App\Http\Controllers\Admin\LoginController;
 use App\Http\Controllers\Admin\NurseController;
 use App\Http\Controllers\Admin\PackageController;
 use App\Http\Controllers\Admin\PasswordController;
+use App\Http\Controllers\Admin\PatientAdmissionController;
 use App\Http\Controllers\Admin\PatientController;
 use App\Http\Controllers\Admin\PermissionController;
-use App\Http\Controllers\Admin\PrescriptionController;
+use App\Http\Controllers\Admin\PrescriptionsController;
 use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\ScheduleController;
@@ -83,49 +84,45 @@ Route::group(['prefix' => 'admin'], function () {
         // Patient
         Route::resource('patients', PatientController::class);
 
-        //Patient_Admission
-        Route::resource('admissions', AdmissionController::class);
+        // Patient_Admission
+        Route::resource('patients/admissions', PatientAdmissionController::class);
 
-        //Appointment
-        Route::resource('appointment', AppointmentController::class);
+        // Appointments
+        Route::resource('appointments', AppointmentsController::class);
 
-        //doctor_department
-
-        //doctor_department
+        // doctor_department
         Route::controller(DepartmentController::class)->group(function () {
-            Route::get('/show/department', 'show')->name('show.department');
-            Route::get('/create/department', 'create')->name('create.department');
-            Route::post('/store/department', 'store')->name('store.department');
-            Route::get('/view/department/{id}', 'view')->name('view.department');
-            Route::get('/edit/department/{id}', 'edit')->name('edit.department');
-            Route::put('/update/department/{id}', 'update')->name('update.department');
-            Route::get('/delete/department/{id}', 'delete')->name('delete.department');
+            Route::get('/departments', 'index')->name('show.department');
+            Route::post('/departments/store', 'store')->name('store.department');
+            Route::get('/departments/edit/{id}', 'edit')->name('edit.department');
+            Route::put('/departments/{id}', 'update')->name('update.department');
+            Route::get('/departments/delete/{id}', 'delete')->name('delete.department');
+            Route::get('/departments/{id}', 'show')->name('view.department');
         });
     });
 
-    // Diagonistic
-    //test
+    // Diagnostic
     Route::resource('tests', TestController::class);
 
-    //assign test
-    Route::controller(TestController::class)->group(function () {
-        Route::get('/assign/tests/list', 'assignTestIndex')->name('assign.test.index');
-        Route::get('/assign/tests/form', 'assignTestCreate')->name('assign.test.create');
-        Route::post('/assign/tests/store', 'assignTestStore')->name('assign.test.store');
+    // assign test
+    Route::controller(AssignTestController::class)->group(function () {
+        Route::get('/assign/tests', 'index')->name('assign.test.index');
+        Route::get('/assign/tests/create', 'create')->name('assign.test.create');
+        Route::post('/assign/tests/store', 'store')->name('assign.test.store');
     });
 
-    //Doctor resource controller
-    Route::resource('doctor', DoctorController::class);
+    // Doctor resource controller
+    Route::resource('doctors', DoctorsController::class);
 
-    Route::get('/doctor/pdf/print{id}', [DoctorController::class, 'doctorPdf'])->name('pdf.doctor');
+    Route::get('/doctors/pdf/print{id}', [DoctorsController::class, 'doctorPdf'])->name('pdf.doctor');
 
-    //Prescription resource controller
-    Route::resource('prescription', PrescriptionController::class);
+    // Prescription resource controller
+    Route::resource('prescriptions', PrescriptionsController::class);
 
-    //Staff resource controller
+    // Staff resource controller
     Route::resource('staffs', StaffController::class);
 
-    //Nurse
+    // Nurse
     Route::resource('nurses', NurseController::class);
 
     //WardBoy

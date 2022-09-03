@@ -8,16 +8,22 @@ use Illuminate\Database\Eloquent\Model;
 class Admission extends Model
 {
     use HasFactory;
-    protected $guarded=[];
+
+    protected $guarded = [];
 
 
     public function patients()
     {
-        return $this->belongsTo(Patient::class,'patient_id','patient_id');
+        return $this->belongsTo(Patient::class, 'patient_id', 'patient_id');
     }
 
     public function doctors()
     {
-        return $this->belongsTo(Doctor::class,'doctor_id','id');
+        return $this->belongsTo(Doctor::class, 'doctor_id', 'id');
+    }
+
+    public function generateAdmissionId()
+    {
+        return 'A' . date('Ymd') . $this->id + 1;
     }
 }

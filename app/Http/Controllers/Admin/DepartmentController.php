@@ -2,90 +2,91 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Models\Department;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Models\Department;
 use Brian2694\Toastr\Facades\Toastr;
+use Illuminate\Http\Request;
 
 class DepartmentController extends Controller
 {
-    public function show()
+    public function index()
     {
-        $department=Department::paginate(10);
+        $departments = Department::paginate(10);
 
-        return view('admin.pages.department.index',compact('department'));
+        return view('admin.pages.department.index', compact('departments'));
     }
+
     public function store(Request $request)
     {
-       
-        $request->validate([
-            'name'=>'required',
-            'description'=>'required',
-
+        $validator = $request->validate([
+            'name' => 'required',
+            'description' => 'required',
         ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
+
         Department::create([
-            'name'=>$request->name,
-            'description'=>$request->description,
-            
-
+            'name' => $request->name,
+            'description' => $request->description,
         ]);
+
         Toastr::success('Department Added Successfully');
 
         return redirect()->back();
-        
     }
 
-    public function view($id)
-      {
-          $department=Department::find($id);
+    public function show(string $id)
+    {
+        $department = Department::findOrFail($id);
 
-          return view('admin.pages.department.view', compact('department'));
+        return view('admin.pages.department.view', compact('department'));
+    }
 
-      }
-      public function edit($id)
-      {
-          $department=Department::find($id);
+    public function edit(string $id)
+    {
+        $department = Department::findOrFail($id);
 
-          return view('admin.pages.department.edit',compact('department'));
+        return view('admin.pages.department.edit', compact('department'));
+    }
 
-      }
-      public function update(Request $request,$id)
-      {
+    public function update(Request $request, $id)
+    {
+        $validator = $request->validate([
+            'name' => 'required',
+            'description' => 'required',
+        ]);
 
+        if ($validator->fails()) {
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
 
-          $department=Department::find($id);
-         
+        $department = Department::findOrFail($id);
 
-          $image_name=$department->image;
-          //              step 1: check image exist in this request.
-                  if($request->hasFile('department_image'))
-                  {
-                      // step 2: generate file name
-                      $image_name=date('Ymdhis') .'.'. $request->file('department_image')->getClientOriginalExtension();
-          
-                      //step 3 : store into project directory
-          
-                      $request->file('department_image')->storeAs('/departments',$image_name);
-          
-                  }
-          $department->update([
+        $imageName = $department->image;
+        if ($request->hasFile('department_image')) {
+            $imageName = date('Ymdhis') . '.' . $request->file('department_image')->getClientOriginalExtension();
+            $request->file('department_image')->storeAs('/departments', $imageName);
+        }
 
-             'name'=>$request->name,
-             'description'=>$request->description,
-             'image'=>$image_name
-         ]);
+        $department->update([
+            'name' => $request->name,
+            'description' => $request->description,
+            'image' => $imageName
+        ]);
 
-         Toastr::success('Department Updated Successfully', 'success');
+        Toastr::success('Department Updated Successfully', 'success');
 
+        return redirect()->route('show.department');
+    }
 
-         return redirect()->route('show.department');
-
-      }
-      public function delete($id)
-      {
-        Department::find($id)->delete();
+    public function delete(string $id)
+    {
+        Department::findOrFail($id)->delete();
 
         Toastr::error('Department Deleted Successfully');
-          return redirect()->back();
-      }
+
+        return redirect()->back();
+    }
 }

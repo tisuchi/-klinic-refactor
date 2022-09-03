@@ -54,6 +54,11 @@ class User extends Authenticatable
         return $this->role->permissions()->where('slug', $permission)->first() ? true : false;
     }
 
+    public function getUserNameAttribut($value)
+    {
+        return ucfirst($this->username);
+    }
+
     public function getUserImageAttribute($value)
     {
         if ($value) {

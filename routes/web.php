@@ -80,7 +80,7 @@ Route::group(['prefix' => 'admin'], function () {
         Route::post('/user/store', [UserController::class, 'store'])->name('user.store');
         Route::get('/user/view/{user_id}', [UserController::class, 'show'])->name('user.details');
 
-        //Patient
+        // Patient
         Route::resource('patients', PatientController::class);
 
         //Patient_Admission

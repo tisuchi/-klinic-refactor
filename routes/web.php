@@ -54,12 +54,13 @@ Route::post('/forget-password', [PasswordController::class, 'store'])->name('for
 Route::get('/reset-password/{token}', [PasswordController::class, 'show'])->name('reset.password');
 Route::post('/reset-password', [PasswordController::class, 'update'])->name('reset.password.post');
 
+// /admin/
 Route::group(['prefix' => 'admin'], function () {
-    Route::get('/', [LoginController::class, 'login'])->name('master.login');
-    Route::post('/login', [LoginController::class, 'dologin'])->name('master.dologin');
+    Route::get('/', [LoginController::class, 'create'])->name('master.login');
+    Route::post('/login', [LoginController::class, 'store'])->name('master.dologin');
 
     Route::group(['middleware' => 'auth'], function () {
-        Route::get('/logout', [LoginController::class, 'logout'])->name('admin.logout');
+        Route::get('/logout', [LoginController::class, 'destroy'])->name('admin.logout');
 
         Route::get('/dashboard', [DashboardController::class, 'dashboard'])->name('admin.dashboard');
 

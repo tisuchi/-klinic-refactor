@@ -8,29 +8,30 @@ use Illuminate\support\Facades\Auth;
 
 class LoginController extends Controller
 {
-    public function login()
+    public function create()
     {
         return view('admin.pages.login.login');
     }
 
-    public function dologin(Request $request)
+    public function store(Request $request)
     {
-        // dd($request->all());
-        $userlogin=$request->except('_token');
-        // dd(Auth::attempt($userlogin));
-        if(Auth::attempt($userlogin)){
-        // dd(auth()->user());
+        $userlogin = $request->except('_token');
 
+        if (Auth::attempt($userlogin)) {
             return redirect()->route('admin.dashboard');
         }
-        else
-        {
-            return redirect()->back();
-        }
+
+        return redirect()->back();
     }
-    public function logout()
+
+    public function destroy()
     {
+        if (!Auth::check()) {
+            abort(404);
+        }
+
         Auth::logout();
-        return redirect()->route('home')->with('message','Logged out.');
+
+        return redirect()->route('home')->with('message', 'Logged out.');
     }
 }

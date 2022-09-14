@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Models\Service;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Models\Service;
 use Brian2694\Toastr\Facades\Toastr;
+use Illuminate\Http\Request;
 
 class ServiceController extends Controller
 {
@@ -16,8 +16,27 @@ class ServiceController extends Controller
      */
     public function index()
     {
-        $services=Service::all();
-         return view('admin.pages.services.index',compact('services'));
+        $services = Service::all();
+        return view('admin.pages.services.index', compact('services'));
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\Response
+     */
+    public function store(Request $request)
+    {
+        $request->validate([
+            'name' => 'required',
+        ]);
+        Service::create([
+            'name' => $request->name,
+            'description' => $request->description,
+            'rate' => $request->rate,
+        ]);
+        return redirect()->route('services.index');
     }
 
     /**
@@ -31,70 +50,33 @@ class ServiceController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        $request->validate([
-            'name' => 'required',
-        ]);
-        Service::create([
-            'name'=>$request->name,
-            'description'=>$request->description,
-            'rate'=>$request->rate,
-        ]);
-        return redirect()->route('services.index');
-    }
-
-    /**
      * Display the specified resource.
      *
-     * @param  int  $id
+     * @param int $id
      * @return \Illuminate\Http\Response
      */
     public function show($id)
     {
-        $service=Service::find($id);
-        return view('admin.pages.services.show',compact('service'));
+        $service = Service::find($id);
+        return view('admin.pages.services.show', compact('service'));
     }
 
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  int  $id
+     * @param int $id
      * @return \Illuminate\Http\Response
      */
     public function edit($id)
     {
-        $service=Service::find($id);
-        return view('admin.pages.services.edit',compact('service'));
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
-    {
-        $service=Service::find($id);
-         $service->update([
-            'name'=>$request->name,
-            'description'=>$request->description,
-            'rate'=>$request->rate,
-         ]);
-         return redirect()->route('services.index');
+        $service = Service::find($id);
+        return view('admin.pages.services.edit', compact('service'));
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
+     * @param int $id
      * @return \Illuminate\Http\Response
      */
     public function destroy($id)
@@ -103,14 +85,30 @@ class ServiceController extends Controller
         return redirect()->back()->with(Toastr::error('Service Deleted Successfully'));
     }
 
-    public function statusUpdate(Request $request,$id){
-        // dd($request->all());
-        $services=Service::find($id);
-        if($services){
-            $services->update([
-                'status'=>$request->status,
-            ]);
-        }
+    public function statusUpdate(Request $request, $id)
+    {
+        Service::findOrFail($id)->update([
+            'status' => $request->status,
+        ]);
+
         return redirect()->back();
+    }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @param int $id
+     * @return \Illuminate\Http\Response
+     */
+    public function update(Request $request, $id)
+    {
+        $service = Service::find($id);
+        $service->update([
+            'name' => $request->name,
+            'description' => $request->description,
+            'rate' => $request->rate,
+        ]);
+        return redirect()->route('services.index');
     }
 }

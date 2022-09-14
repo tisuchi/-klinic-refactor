@@ -8,21 +8,29 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Patient extends Model
 {
-    use HasFactory,SoftDeletes;
-    protected $guarded=[];
+    use HasFactory, SoftDeletes;
+
+    protected $guarded = [];
+
+    /**
+     * @return string
+     */
+    public function generatePatientId(): string
+    {
+        return 'P' . date('Ymd') . $this->id + 1;
+    }
 
     public function getPatientImageAttribute($value)
     {
-        if($value)
-        {
-            return url('/uploads/patients/'.$value);
+        if ($value) {
+            return url('/uploads/patients/' . $value);
         }
         return url('/img/avatar.png');
     }
 
     public function getFullNameAttribute()
     {
-        return $this->first_name. ' '. $this->last_name;
+        return $this->first_name . ' ' . $this->last_name;
     }
 
 }
